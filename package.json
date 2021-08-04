@@ -1,0 +1,26 @@
+{
+  "name": "gottabe-plugin-dev",
+  "version": "1.0.0",
+  "description": "GottaBe Plugin development api",
+  "main": "./dist/index.js",
+  "typings": "./dist/index.d.ts",
+  "scripts": {
+	"prepublish": "npm run build",
+	"build": "tsc",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gottabe-io/gottabe-plugin-dev.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/gottabe-io/gottabe-plugin-dev/issues"
+  },
+  "homepage": "https://github.com/gottabe-io/gottabe-plugin-dev#readme",
+  "devDependencies": {
+    "typescript": "^4.3.5"
+  }
+}
