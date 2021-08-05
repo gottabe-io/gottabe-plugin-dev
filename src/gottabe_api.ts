@@ -1,9 +1,101 @@
-import { BuildConfig, PackageInfo, TargetConfig } from './base_types';
+import {Phase} from './base_types';
+
+export interface PackageInfo {
+	groupId: string;
+	artifactId: string;
+	version: string;
+	includeDir?: string;
+	build?: BuildConfig;
+	checksum: string;
+	dirs: any;
+	dependencies: PackageInfo[];
+	scope: string[];
+}
+
+export interface CommandLineOptions {
+	clean: boolean;
+	build: boolean;
+	package: boolean;
+	install: boolean;
+	test: boolean;
+	arch?: string;
+	platform?: string;
+}
+
+export interface Plugin {
+	process(phaseParams: PhaseParams, pluginContext: PluginContext): Promise<void>;
+}
+
+export interface PluginConfig {
+	packageName: string;
+	config?: any;
+}
+
+export interface TargetConfig {
+	name: string;
+	arch: string;
+	platform: string;
+	toolchain: string;
+	plugins?: Plugin[];
+	includeDirs?: (string)[] | null;
+	sources?: (string)[] | null;
+	options?: Options;
+	defines?: any;
+	libraryPaths?: (string)[] | null;
+	libraries?: (string)[] | null;
+	linkoptions?: Linkoptions;
+}
+
+export interface Options {
+	optimization?: number;
+	debug?: number;
+	warnings?: string;
+	other?: string;
+}
+
+export interface Linkoptions {
+	debugInformation?: boolean | null;
+}
+
+export interface PackageConfig {
+	name?: string;
+	includes?: (string)[] | null;
+	other?: (string)[] | null;
+}
+
+export interface BuildConfig {
+	groupId: string;
+	artifactId: string;
+	version: string;
+	type: string;
+	description: string;
+	author?: string;
+	source?: string;
+	modules?: BuildConfig[];
+	plugins?: Plugin[];
+	dependencies?: (string)[] | null;
+	includeDirs?: (string)[] | null;
+	sources?: (string)[];
+	testSources?: (string)[] | null;
+	targets?: (TargetConfig)[];
+	package?: PackageConfig;
+	servers?: string[];
+}
+
+export interface PhaseParams {
+	buildConfig: BuildConfig;
+	currentTarget: TargetConfig;
+	commandOptions: CommandLineOptions;
+	inputFiles: string[];
+	phase: Phase;
+	previousPhase?: PhaseParams;
+	solvedDependencies?:PackageInfo[];
+}
 
 /**
  * Retrieve project informations
  */
-export interface Project {
+ export interface Project {
 	/**
 	 * Return the parsed build descriptor
 	 */
@@ -105,3 +197,8 @@ export interface PackageManager {
 	packageProject(project: Project): Promise<PackageInfo>;
 
 }
+
+export interface PluginContext {
+	getPackageManager(): PackageManager;
+	getCurrentProject(): Project;
+};
