@@ -14,8 +14,8 @@
     "url": "git+https://github.com/gottabe-io/gottabe-plugin-dev.git"
   },
   "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "author": "gottabe-io",
+  "license": "GPL-3.0",
   "bugs": {
     "url": "https://github.com/gottabe-io/gottabe-plugin-dev/issues"
   },
