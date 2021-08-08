@@ -17,52 +17,155 @@
 
 import {Phase} from './base_types';
 
+/**
+ * Package information extracted from the build configuration of a package.
+ */
 export interface PackageInfo {
+	/**
+	 * Group identifier of the package
+	 */
 	groupId: string;
+	/**
+	 * Artifact identifier of the package
+	 */
 	artifactId: string;
+	/**
+	 * Version of the package
+	 */
 	version: string;
+	/**
+	 * Include directory
+	 */
 	includeDir?: string;
+	/**
+	 * The original build configuration
+	 */
 	build?: BuildConfig;
+	/**
+	 * The checksum of the files of the package for the current target
+	 */
 	checksum: string;
+	/**
+	 * Directories for the files
+	 */
 	dirs: any;
+	/**
+	 * The dependencies of this package
+	 */
 	dependencies: PackageInfo[];
+	/**
+	 * The current scope of this package
+	 */
 	scope: string[];
 }
 
+/**
+ * The command line options parsed
+ */
 export interface CommandLineOptions {
+	/**
+	 * The state of the clean task
+	 */
 	clean: boolean;
+	/**
+	 * The state of the build task
+	 */
 	build: boolean;
+	/**
+	 * The state of the package task
+	 */
 	package: boolean;
+	/**
+	 * The state of the install task
+	 */
 	install: boolean;
+	/**
+	 * The state of the test task
+	 */
 	test: boolean;
+	/**
+	 * The architecture
+	 */
 	arch?: string;
+	/**
+	 * The platform
+	 */
 	platform?: string;
 }
 
+/**
+ * The plugin descriptor
+ */
+export interface PluginDescriptor {
+	/**
+	 * The plugin's group identifier
+	 */
+	groupId: string;
+	/**
+	 * The plugin's artifact identifier
+	 */
+	artifactId: string;
+	/**
+	 * The version of the plugin
+	 */
+	version: string;
+	/**
+	 * An array with the phases when the plugin must be called. Default is the same of all phases
+	 */
+	phases?: string[];
+}
+
+/**
+ * Interace for plugin implementation
+ */
 export interface Plugin {
+	/**
+	 * The plugin stuff must be implemented in this method. The method doesn't require a result, but can be asynchronous.
+	 * @param phaseParams the phase parameters
+	 * @param pluginContext the plugin context
+	 */
 	process(phaseParams: PhaseParams, pluginContext: PluginContext): Promise<void>;
 }
 
+/**
+ * Interface for a plugin configuration on the build
+ */
 export interface PluginConfig {
-	packageName: string;
+	/**
+	 * The package description following the pattern <groupId>/<artifactId>[@<version>][:<scope>]
+	 */
+	package: string;
+	/**
+	 * Phases used in the current configuration. If the plugin doesn't use any of the phases specified, it will be ignored.
+	 */
+	phases?: string[];
+	/**
+	 * Additional configurations
+	 */
 	config?: any;
 }
 
+/**
+ * Interface for a target configuration on the build
+ */
 export interface TargetConfig {
 	name: string;
 	arch: string;
 	platform: string;
 	toolchain: string;
-	plugins?: Plugin[];
+	plugins?: PluginConfig[];
 	includeDirs?: (string)[] | null;
 	sources?: (string)[] | null;
 	options?: Options;
 	defines?: any;
 	libraryPaths?: (string)[] | null;
 	libraries?: (string)[] | null;
-	linkoptions?: Linkoptions;
+	linkoptions?: LinkOptions;
 }
 
+/**
+ * Interface to the compiler options on a target
+ */
 export interface Options {
 	optimization?: number;
 	debug?: number;
@@ -70,16 +173,26 @@ export interface Options {
 	other?: string;
 }
 
-export interface Linkoptions {
+/**
+ * Interface to the linker options on a target
+ */
+ export interface LinkOptions {
 	debugInformation?: boolean | null;
+	other?: any;
 }
 
+/**
+ * Interface for the packaging configuration
+ */
 export interface PackageConfig {
 	name?: string;
 	includes?: (string)[] | null;
 	other?: (string)[] | null;
 }
 
+/**
+ * Interface for the build descriptor
+ */
 export interface BuildConfig {
 	groupId: string;
 	artifactId: string;
@@ -89,7 +202,7 @@ export interface BuildConfig {
 	author?: string;
 	source?: string;
 	modules?: BuildConfig[];
-	plugins?: Plugin[];
+	plugins?: PluginConfig[];
 	dependencies?: (string)[] | null;
 	includeDirs?: (string)[] | null;
 	sources?: (string)[];
@@ -99,14 +212,19 @@ export interface BuildConfig {
 	servers?: string[];
 }
 
+/**
+ * Interface for the phase parameters used in plugins
+ */
 export interface PhaseParams {
 	buildConfig: BuildConfig;
 	currentTarget: TargetConfig;
 	commandOptions: CommandLineOptions;
 	inputFiles: string[];
 	phase: Phase;
-	previousPhase?: PhaseParams;
+	previousPhaseParams?: PhaseParams;
 	solvedDependencies?:PackageInfo[];
+	defaultPrevented: boolean;
+	preventDefault(): void;
 }
 
 /**
@@ -215,7 +333,20 @@ export interface PackageManager {
 
 }
 
+/**
+ * Interface for the plugin context
+ */
 export interface PluginContext {
+	/**
+	 * Retrieve a instance of the package manager
+	 */
 	getPackageManager(): PackageManager;
+	/**
+	 * Return the current project
+	 */
 	getCurrentProject(): Project;
+	/**
+	 * Return the configuration of the current plugin
+	 */
+	getPluginConfig(): any;
 };
