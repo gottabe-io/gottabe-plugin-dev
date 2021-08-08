@@ -1,0 +1,22 @@
+{
+  "name": "gottabe-plugin-build",
+  "version": "1.0.0",
+  "description": "",
+  "main": "./dist/index.bundle.js",
+  "scripts": {
+    "build": "tsc && browserify ./dist/index.js --node --standalone plugin -o ./dist/index.bundle.js ",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "gottabe-plugin-dev": "^1.0.1"
+  },
+  "devDependencies": {
+    "browserify": "^17.0.0",
+    "ts-node": "^10.1.0",
+    "tslib": "^2.3.0",
+    "typescript": "^4.3.5"
+  }
+}

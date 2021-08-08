@@ -1,26 +1,20 @@
-/* Copyright (C) 2018 Alan N. Lohse
+/*
+Copyright 2022 gottabe-io
 
-   This file is part of GottaBe.
+Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
 
-    GottaBe is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
+1. Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
 
-    GottaBe is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+2. Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
 
-    You should have received a copy of the GNU General Public License
-	along with GottaBe.  If not, see <http://www.gnu.org/licenses/> */
+3. Neither the name of the copyright holder nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ */
 
 import {Phase} from './base_types';
 
-/**
- * Package information extracted from the build configuration of a package.
- */
-export interface PackageInfo {
+export interface BaseDescriptor {
 	/**
 	 * Group identifier of the package
 	 */
@@ -33,6 +27,12 @@ export interface PackageInfo {
 	 * Version of the package
 	 */
 	version: string;
+}
+
+/**
+ * Package information extracted from the build configuration of a package.
+ */
+export interface PackageInfo extends BaseDescriptor {
 	/**
 	 * Include directory
 	 */
@@ -80,6 +80,10 @@ export interface CommandLineOptions {
 	 */
 	install: boolean;
 	/**
+	 * The state of the publish task
+	 */
+	publish: boolean;
+	/**
 	 * The state of the test task
 	 */
 	test: boolean;
@@ -91,24 +95,29 @@ export interface CommandLineOptions {
 	 * The platform
 	 */
 	platform?: string;
+	/**
+	 * The target
+	 */
+	target?: string;
+	/**
+	 * Clean all
+	 */
+	all?: boolean;
+	/**
+	 * Settings file
+	 */
+	settingsFile?: string;
+	/**
+	 * Skip tests. Incompatible with command test
+	 */
+	noTests?: boolean;
 }
 
 /**
  * The plugin descriptor
  */
-export interface PluginDescriptor {
-	/**
-	 * The plugin's group identifier
-	 */
-	groupId: string;
-	/**
-	 * The plugin's artifact identifier
-	 */
-	artifactId: string;
-	/**
-	 * The version of the plugin
-	 */
-	version: string;
+export interface PluginDescriptor extends BaseDescriptor {
+	main: string;
 	/**
 	 * An array with the phases when the plugin must be called. Default is the same of all phases
 	 */
@@ -160,7 +169,7 @@ export interface TargetConfig {
 	defines?: any;
 	libraryPaths?: (string)[] | null;
 	libraries?: (string)[] | null;
-	linkoptions?: LinkOptions;
+	linkOptions?: LinkOptions;
 }
 
 /**
@@ -193,10 +202,7 @@ export interface PackageConfig {
 /**
  * Interface for the build descriptor
  */
-export interface BuildConfig {
-	groupId: string;
-	artifactId: string;
-	version: string;
+export interface BuildConfig extends BaseDescriptor {
 	type: string;
 	description: string;
 	author?: string;
@@ -219,7 +225,9 @@ export interface PhaseParams {
 	buildConfig: BuildConfig;
 	currentTarget: TargetConfig;
 	commandOptions: CommandLineOptions;
+	project: Project,
 	inputFiles: string[];
+	destDir?: string;
 	phase: Phase;
 	previousPhaseParams?: PhaseParams;
 	solvedDependencies?:PackageInfo[];
@@ -236,9 +244,13 @@ export interface PhaseParams {
 	 */
 	getBuildConfig(): BuildConfig;
 	/**
-	 * Return the name of the project in the build descriptor
+	 * Return the group id of the project in the build descriptor
 	 */
-	getName(): string;
+	getGroupId(): string;
+	/**
+	 * Return the artifact id of the project in the build descriptor
+	 */
+	getArtifactId(): string;
 	/**
 	 * Return the version of the project from the build descriptor
 	 */
@@ -277,56 +289,56 @@ export interface PackageManager {
 
 	/**
 	 * Load a package into the build directory. If the package is not in cache, it throws an error.
-	 * @param packageInfo 
-	 * @param arch 
-	 * @param platform 
-	 * @param toolchain 
+	 * @param packageInfo
+	 * @param arch
+	 * @param platform
+	 * @param toolchain
 	 * @returns an array with all dependency packages
 	 */
 	loadPackage(packageInfo: PackageInfo, arch:string, platform:string, toolchain:string): Promise<PackageInfo[]>;
 
 	/**
 	 * Download a package from a list of servers. The method searches among the servers and downloads the package from the first it finds. Can be platform specific if it is specified.
-	 * @param packageInfo 
-	 * @param servers 
-	 * @param arch 
-	 * @param platform 
-	 * @param toolchain 
+	 * @param packageInfo
+	 * @param servers
+	 * @param arch
+	 * @param platform
+	 * @param toolchain
 	 * @returns a promise to the package info
 	 */
 	downloadPackage(packageInfo: PackageInfo, servers: string[], arch?:string, platform?:string, toolchain?:string): Promise<PackageInfo>;
 
 	/**
 	 * Check in the servers if the checksum of the files is the same, otherwise update the files.
-	 * @param packageInfo 
-	 * @param servers 
-	 * @param arch 
-	 * @param platform 
-	 * @param toolchain 
+	 * @param packageInfo
+	 * @param servers
+	 * @param arch
+	 * @param platform
+	 * @param toolchain
 	 * @returns a promise to the package info
 	 */
 	updatePackage(packageInfo: PackageInfo, servers: string[]): Promise<PackageInfo>;
 
 	/**
 	 * Publish the package in the local repository
-	 * @param project 
+	 * @param project
 	 * @returns a promise to the package info
 	 */
 	publishLocal(project: Project): Promise<PackageInfo>;
 
 	/**
 	 * Publish the package in the specified server
-	 * @param project 
-	 * @param server 
-	 * @param username 
-	 * @param password 
+	 * @param project
+	 * @param server
+	 * @param username
+	 * @param password
 	 * @returns a promise to the package info
 	 */
 	publish(project: Project, server: string, username: string, password: string): Promise<PackageInfo>;
 
 	/**
 	 * Create a package for the project using a build previously made
-	 * @param project 
+	 * @param project
 	 * @returns a promise to the package info
 	 */
 	packageProject(project: Project): Promise<PackageInfo>;

@@ -1,6 +1,6 @@
 {
   "name": "gottabe-plugin-dev",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "GottaBe Plugin development api",
   "main": "./dist/index.js",
   "typings": "./dist/index.d.ts",
@@ -15,7 +15,7 @@
   },
   "keywords": [],
   "author": "gottabe-io",
-  "license": "GPL-3.0",
+  "license": "BSD-3-Clause",
   "bugs": {
     "url": "https://github.com/gottabe-io/gottabe-plugin-dev/issues"
   },
