@@ -14,19 +14,19 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 import {Phase} from './base_types';
 
+/**
+ * The base descriptor
+ */
 export interface BaseDescriptor {
-	/**
-	 * Group identifier of the package
-	 */
 	groupId: string;
-	/**
-	 * Artifact identifier of the package
-	 */
 	artifactId: string;
-	/**
-	 * Version of the package
-	 */
 	version: string;
+	description?: string;
+	author?: string;
+	sourceUrl?: string;
+	issueUrl?: string;
+	documentationUrl?: string;
+	license?: string;
 }
 
 /**
@@ -40,7 +40,7 @@ export interface PackageInfo extends BaseDescriptor {
 	/**
 	 * The original build configuration
 	 */
-	build?: BuildConfig;
+	build?: BuildDescriptor;
 	/**
 	 * The checksum of the files of the package for the current target
 	 */
@@ -202,27 +202,24 @@ export interface PackageConfig {
 /**
  * Interface for the build descriptor
  */
-export interface BuildConfig extends BaseDescriptor {
-	type: string;
-	description: string;
-	author?: string;
-	source?: string;
-	modules?: BuildConfig[];
-	plugins?: PluginConfig[];
-	dependencies?: (string)[] | null;
-	includeDirs?: (string)[] | null;
-	sources?: (string)[];
-	testSources?: (string)[] | null;
-	targets?: (TargetConfig)[];
+export interface BuildDescriptor extends BaseDescriptor {
+	dependencies?: string[];
+	includeDirs?: string[];
+	modules?: BuildDescriptor[];
 	package?: PackageConfig;
-	servers?: string[];
+	plugins?: PluginConfig[];
+	sources?: string[];
+	targets?: TargetConfig[];
+	testSources?: string[];
+	type: string;
+
 }
 
 /**
  * Interface for the phase parameters used in plugins
  */
 export interface PhaseParams {
-	buildConfig: BuildConfig;
+	buildConfig: BuildDescriptor;
 	currentTarget: TargetConfig;
 	commandOptions: CommandLineOptions;
 	project: Project,
@@ -242,7 +239,7 @@ export interface PhaseParams {
 	/**
 	 * Return the parsed build descriptor
 	 */
-	getBuildConfig(): BuildConfig;
+	getBuildConfig(): BuildDescriptor;
 	/**
 	 * Return the group id of the project in the build descriptor
 	 */
@@ -334,7 +331,7 @@ export interface PackageManager {
 	 * @param password
 	 * @returns a promise to the package info
 	 */
-	publish(project: Project, server: string, username: string, password: string): Promise<PackageInfo>;
+	publish(project: Project, server: string): Promise<PackageInfo>;
 
 	/**
 	 * Create a package for the project using a build previously made

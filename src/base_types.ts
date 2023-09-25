@@ -33,6 +33,10 @@ export enum Phase {
 	 */
 	COMPILE,
 	/**
+	 * The test compiling phase. It occurs when the build task added to the command line and tests are enabled
+	 */
+	COMPILE_TESTS,
+	/**
 	 * The linking phase. It occurs before the linking phase
 	 */
 	PRELINK,
@@ -40,6 +44,10 @@ export enum Phase {
 	 * The linking phase. It occurs after the compile phase in the build task
 	 */
 	LINK,
+	/**
+	 * The test linking phase. It occurs after the compile phase in the build task and tests are enabled
+	 */
+	LINK_TESTS,
 	/**
 	 * The test phase can occur when the task test is added or after the build
 	 */
